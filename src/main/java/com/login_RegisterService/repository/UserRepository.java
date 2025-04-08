@@ -9,6 +9,8 @@ import org.springframework.stereotype.Repository;
 
 import com.login_RegisterService.entity.UserCreadincial;
 
+import jakarta.transaction.Transactional;
+
 @Repository
 public interface UserRepository extends JpaRepository<UserCreadincial, Integer> {
 
@@ -19,5 +21,9 @@ public interface UserRepository extends JpaRepository<UserCreadincial, Integer> 
 	Collection<UserCreadincial> findUserCreadincialByUsername(String username);
 
 	int deleteByUsername(String username);
+	
+	@SuppressWarnings("unchecked")
+	@Transactional
+	UserCreadincial save(UserCreadincial user);
 
 }
