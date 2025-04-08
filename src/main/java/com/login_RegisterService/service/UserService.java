@@ -1,19 +1,29 @@
 package com.login_RegisterService.service;
 
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import com.login_RegisterService.entity.UserCreadincial;
 import com.login_RegisterService.repository.UserRepository;
+import com.login_RegisterService.security.service.MyJwtService;
+import com.login_RegisterService.vo.LoginCreadintial;
+
 
 @Service
 public class UserService {
 	
-	@Autowired
-	UserRepository userRepo;
+	@Autowired UserRepository userRepo;
+	@Autowired AuthenticationManager authManager;
+	
+	@Autowired MyJwtService myJwtService;
+	
 	
 	public UserCreadincial saveUser(UserCreadincial user) {
 		try {
@@ -47,11 +57,16 @@ public class UserService {
 	
 	
 	public  UserCreadincial getUserCreadincialByEmailAndPassword(String email,String password) {
+		
+		List<UserCreadincial> list = userRepo.findUserCreadincialByEmailAndPassword(email,password);
+		
+		System.out.println("Temp \n "+list);
 		try {
 			UserCreadincial first = userRepo
 						.findUserCreadincialByEmailAndPassword(email,password)
 			            .stream()
 			            .findFirst().get();
+			System.out.println("text " + first);
 			if(Optional.of(first).isPresent()) {
 				return first;
 			}
@@ -98,6 +113,20 @@ public class UserService {
 	}
 	
 	
+	
+	public String varify(LoginCreadintial user ) {
+		UsernamePasswordAuthenticationToken userToken = new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword());
+		
+		Authentication authenticate = 
+						authManager.authenticate(
+								userToken
+									);
+		System.out.println("MyTest "+ userToken);
+		if(authenticate.isAuthenticated()) {
+			return myJwtService.generateToken(user.getEmail()) ;
+		}
+		return "User not found....!!!";
+	}
 	
 	
 }
